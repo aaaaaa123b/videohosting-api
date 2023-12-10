@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet id="2023-12-08_19:16" author="Diana Harlap">
+        <sql>
+            create sequence users_seq increment by 1 start 1;
+            alter sequence users_seq owner to postgres;
+
+            create table if not exists users
+            (
+                id       bigint       not null primary key,
+                email    varchar(255) not null,
+                name     varchar(255) not null,
+                username varchar(255) not null
+            );
+
+            alter table users owner to postgres;
+        </sql>
+    </changeSet>
+
+    <changeSet id="2023-12-08_19:42" author="Diana Harlap">
+        <sql>
+            create sequence channels_seq increment by 1 start 1;
+            alter sequence channels_seq owner to postgres;
+
+            create table if not exists channels
+            (
+                id            bigint       not null primary key,
+                avatar        text not null,
+                category      varchar(255) not null,
+                creation_date timestamp(6) not null,
+                description   varchar(255) not null,
+                language      varchar(20) not null,
+                name          varchar(255) not null,
+                owner_id      bigint       unique
+                    constraint FK_owner_of_channel
+                    references users
+            );
+
+            alter table channels owner to postgres;
+        </sql>
+    </changeSet>
+
+    <changeSet id="2023-12-08_19:45" author="Diana Harlap">
+        <sql>
+            create table if not exists users_m2m_channels
+            (
+                user_id    bigint not null constraint FK_subscriber_of_channel references users,
+                channel_id bigint not null constraint FK_channel_of_subscriber references channels,
+                primary key (user_id, channel_id)
+            );
+
+            alter table users_m2m_channels owner to postgres;
+        </sql>
+    </changeSet>
+</databaseChangeLog>
